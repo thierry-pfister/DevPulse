@@ -1,0 +1,20 @@
+topics:
+  - concept: "The Maybe Monad"
+    tag: functional
+    language: fsharp
+    runnable: true
+    foreshadow_next: "Result<T> and railway-oriented programming"
+    priority: 1
+    skip: false
+
+  - concept: "Docker Layer Caching"
+    tag: devops
+    runnable: false
+    priority: 2
+    skip: false
+
+  - concept: "JWT Tokens Demystified"
+    tag: security
+    runnable: false
+    priority: 3
+    skip: false

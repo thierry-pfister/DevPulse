@@ -1,6 +1,12 @@
 <Solution>
   <Folder Name="/services/" />
+  <Folder Name="/services/core-api/">
+    <Project Path="services/core-api/DevPulse.Api.csproj" />
+  </Folder>
   <Folder Name="/services/core-domain/">
     <Project Path="services/core-domain/DevPulse.Domain.fsproj" />
+  </Folder>
+  <Folder Name="/services/core-infrastructure/">
+    <Project Path="services/core-infrastructure/DevPulse.Infrastructure.csproj" />
   </Folder>
 </Solution>
