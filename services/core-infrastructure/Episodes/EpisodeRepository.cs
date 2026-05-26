@@ -51,4 +51,14 @@ public class EpisodeRepository(AppDbContext db) : IEpisodeRepository
         var max = await db.Episodes.MaxAsync(e => (int?)e.EpisodeNumber);
         return (max ?? 0) + 1;
     }
+
+    public async Task<FSharpList<Episode>> FindRecentPublishedByTag(string tag, int count)
+    {
+        var entities = await db.Episodes
+            .Where(e => e.Tag == tag && e.Status == "Published" && e.PublishedAt != null)
+            .OrderByDescending(e => e.PublishedAt)
+            .Take(count)
+            .ToListAsync();
+        return ListModule.OfSeq(entities.Select(EpisodeMapper.ToDomain));
+    }
 }

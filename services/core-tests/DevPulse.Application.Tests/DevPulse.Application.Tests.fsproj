@@ -9,6 +9,8 @@
     <Compile Include="Episodes/FakeEpisodeRepository.fs" />
     <Compile Include="Episodes/EpisodeCommandTests.fs" />
     <Compile Include="Episodes/EpisodeQueryTests.fs" />
+    <Compile Include="Generation/FakeClaudeClient.fs" />
+    <Compile Include="Generation/GenerateEpisodeCommandTests.fs" />
   </ItemGroup>
 
   <ItemGroup>

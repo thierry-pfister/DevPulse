@@ -107,7 +107,7 @@ internal static class EpisodeMapper
         YouTube: o.YouTube is null ? null : new YouTubeContentDto(o.YouTube.Value.Title, o.YouTube.Value.Description, o.YouTube.Value.Script)
     );
 
-    private static EpisodeOutput DeserializeContent(string json)
+    internal static EpisodeOutput DeserializeContent(string json)
     {
         var dto = JsonSerializer.Deserialize<EpisodeContentDto>(json, JsonOptions)
             ?? throw new InvalidOperationException("Failed to deserialize episode content");

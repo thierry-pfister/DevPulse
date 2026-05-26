@@ -14,4 +14,5 @@ type IEpisodeRepository =
     abstract member FindDraft  : unit -> Task<Episode option>
     abstract member FindAll    : EpisodeStatus option -> Task<Episode list>
     abstract member Save       : Episode -> Task
-    abstract member NextNumber : unit -> Task<int>
+    abstract member NextNumber             : unit -> Task<int>
+    abstract member FindRecentPublishedByTag : string -> int -> Task<Episode list>

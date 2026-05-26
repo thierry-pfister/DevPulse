@@ -6,6 +6,9 @@ obj/
 .vs/
 *.nupkg
 *.snupkg
+appsettings.Development.json
+appsettings.*.json
+!appsettings.json
 
 # Node
 node_modules/

@@ -1,14 +1,32 @@
 using DevPulse.Infrastructure.Episodes;
+using DevPulse.Infrastructure.TopicQueue;
 using Microsoft.EntityFrameworkCore;
 
 namespace DevPulse.Infrastructure.Data;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
-    public DbSet<EpisodeEntity> Episodes => Set<EpisodeEntity>();
+    public DbSet<EpisodeEntity>     Episodes   => Set<EpisodeEntity>();
+    public DbSet<TopicQueueEntity>  TopicQueue => Set<TopicQueueEntity>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
+        builder.Entity<TopicQueueEntity>(t =>
+        {
+            t.ToTable("topic_queue");
+            t.HasKey(x => x.Id);
+            t.Property(x => x.Id).HasColumnName("id");
+            t.Property(x => x.Concept).HasColumnName("concept");
+            t.Property(x => x.Tag).HasColumnName("tag");
+            t.Property(x => x.Language).HasColumnName("language");
+            t.Property(x => x.Runnable).HasColumnName("runnable");
+            t.Property(x => x.ForeshadowNext).HasColumnName("foreshadow_next");
+            t.Property(x => x.Priority).HasColumnName("priority");
+            t.Property(x => x.Status).HasColumnName("status");
+            t.Property(x => x.Source).HasColumnName("source");
+            t.Property(x => x.CreatedAt).HasColumnName("created_at");
+        });
+
         builder.Entity<EpisodeEntity>(e =>
         {
             e.ToTable("episodes");

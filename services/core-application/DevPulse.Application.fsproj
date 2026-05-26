@@ -10,6 +10,8 @@
     <Compile Include="Episodes/IEpisodeRepository.fs" />
     <Compile Include="Episodes/EpisodeCommands.fs" />
     <Compile Include="Episodes/EpisodeQueries.fs" />
+    <Compile Include="Generation/IClaudeClient.fs" />
+    <Compile Include="Generation/GenerateEpisodeCommands.fs" />
   </ItemGroup>
 
   <ItemGroup>

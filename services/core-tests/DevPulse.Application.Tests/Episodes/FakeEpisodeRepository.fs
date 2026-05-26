@@ -40,3 +40,11 @@ type FakeEpisodeRepository(?seed: Episode list) =
         member _.NextNumber() =
             counter <- counter + 1
             Task.FromResult counter
+
+        member _.FindRecentPublishedByTag tag count =
+            store
+            |> Map.toList
+            |> List.map snd
+            |> List.filter (fun ep -> ep.Status = Published && ep.Tag = tag)
+            |> List.truncate count
+            |> Task.FromResult
