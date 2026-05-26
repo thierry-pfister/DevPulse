@@ -13,6 +13,7 @@
     <Project Path="services/core-infrastructure/DevPulse.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/services/core-tests/">
+    <Project Path="services/core-tests/DevPulse.Domain.Tests/DevPulse.Domain.Tests.fsproj" />
     <Project Path="services/core-tests/DevPulse.Tests.csproj" />
   </Folder>
 </Solution>

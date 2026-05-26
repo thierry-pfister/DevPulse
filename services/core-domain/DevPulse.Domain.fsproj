@@ -8,6 +8,7 @@
   <ItemGroup>
     <Compile Include="Episodes/GenerationInput.fs" />
     <Compile Include="Episodes/EpisodeOutput.fs" />
+    <Compile Include="Episodes/Episode.fs" />
   </ItemGroup>
 
 </Project>
