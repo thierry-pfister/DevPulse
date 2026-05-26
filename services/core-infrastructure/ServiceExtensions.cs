@@ -1,7 +1,11 @@
+using DevPulse.Application.Episodes;
 using DevPulse.Application.Publishing;
 using DevPulse.Infrastructure.Config;
 using DevPulse.Infrastructure.Data;
+using DevPulse.Infrastructure.Episodes;
+using DevPulse.Infrastructure.Migrations;
 using DevPulse.Infrastructure.Publishers;
+using FluentMigrator.Runner;
 using Hangfire;
 using Hangfire.PostgreSql;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +27,15 @@ public static class ServiceExtensions
 
         services.AddDbContext<AppDbContext>(options =>
             options.UseNpgsql(connectionString));
+
+        services.AddScoped<IEpisodeRepository, EpisodeRepository>();
+
+        services.AddFluentMigratorCore()
+            .ConfigureRunner(runner => runner
+                .AddPostgres()
+                .WithGlobalConnectionString(connectionString)
+                .ScanIn(typeof(M20260526001_CreateEpisodesTable).Assembly).For.Migrations())
+            .AddLogging(lb => lb.AddFluentMigratorConsole());
 
         services.AddHangfire(config =>
             config.UsePostgreSqlStorage(c =>

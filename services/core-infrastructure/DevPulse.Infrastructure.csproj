@@ -6,6 +6,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="FluentMigrator" Version="*" />
+    <PackageReference Include="FluentMigrator.Runner" Version="*" />
+    <PackageReference Include="FluentMigrator.Runner.Postgres" Version="*" />
     <PackageReference Include="Hangfire.AspNetCore" Version="1.8.23" />
     <PackageReference Include="Hangfire.Core" Version="*" />
     <PackageReference Include="Hangfire.PostgreSql" Version="*" />
@@ -16,7 +19,7 @@
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <RootNamespace>core_infrastructure</RootNamespace>
+    <RootNamespace>DevPulse.Infrastructure</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
