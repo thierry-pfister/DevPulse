@@ -2,12 +2,14 @@
 
   <ItemGroup>
     <ProjectReference Include="..\core-domain\DevPulse.Domain.fsproj" />
+    <ProjectReference Include="..\core-application\DevPulse.Application.fsproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Hangfire.AspNetCore" Version="1.8.23" />
     <PackageReference Include="Hangfire.Core" Version="*" />
     <PackageReference Include="Hangfire.PostgreSql" Version="*" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="*" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="*" />
     <PackageReference Include="YamlDotNet" Version="*" />
   </ItemGroup>
