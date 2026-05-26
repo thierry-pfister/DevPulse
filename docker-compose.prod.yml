@@ -57,7 +57,7 @@ services:
       - "3001:3000"
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=http://devpulse-api:8080
+      - API_BASE_URL=http://devpulse-api:8080
       - API_KEY=${API_KEY}
     depends_on:
       - api
