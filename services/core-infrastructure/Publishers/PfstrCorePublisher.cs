@@ -35,6 +35,7 @@ public class PfstrCorePublisher(HttpClient http) : IPublisher
                 summary      = article.Subtitle,
                 subtitle     = article.Subtitle,
                 content      = article.Body,
+                coverImage   = article.CoverImageUrl?.Value,
                 canonicalUrl = $"https://thierrypfister.dev/blog/{slug}",
                 tags         = article.Tags,
             });

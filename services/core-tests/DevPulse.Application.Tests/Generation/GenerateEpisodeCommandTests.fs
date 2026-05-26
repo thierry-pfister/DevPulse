@@ -37,6 +37,7 @@ let private makeOutput () : EpisodeOutput =
         Body            = "Body text"
         RunnableSnippet = None
         ImagePrompt     = "An abstract image"
+        CoverImageUrl   = None
         Foreshadow      = "Tomorrow: Result<T>"
         Tags            = ["functional"; "fsharp"] }
       Reddit  = None

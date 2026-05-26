@@ -15,6 +15,7 @@ internal static class EpisodeFixtures
                 body:             "# The Maybe Monad\n\nSome markdown content.",
                 runnableSnippet:  FSharpOption<string>.None,
                 imagePrompt:      "abstract monad illustration",
+                coverImageUrl:    FSharpOption<string>.None,
                 foreshadow:       "Tomorrow: Result<T> — when None isn't enough.",
                 tags:             ListModule.OfSeq(new[] { "functional", "fsharp" })
             ),

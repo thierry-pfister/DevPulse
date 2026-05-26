@@ -5,6 +5,7 @@ using DevPulse.Infrastructure.Claude;
 using DevPulse.Infrastructure.Config;
 using DevPulse.Infrastructure.Data;
 using DevPulse.Infrastructure.Episodes;
+using DevPulse.Infrastructure.ImageGeneration;
 using DevPulse.Infrastructure.Migrations;
 using DevPulse.Infrastructure.Notifications;
 using DevPulse.Infrastructure.Publishers;
@@ -52,6 +53,7 @@ public static class ServiceExtensions
 
         RegisterClaude(services, configuration);
         RegisterNotifier(services, configuration);
+        RegisterImageGeneration(services, configuration);
         RegisterPublishers(services, configuration);
         RegisterSchedulingJobs(services, configuration);
 
@@ -138,6 +140,23 @@ public static class ServiceExtensions
 
         services.AddTransient<IPublisher>(sp => sp.GetRequiredService<PfstrCorePublisher>());
         services.AddTransient<IPublisher>(sp => sp.GetRequiredService<DevToPublisher>());
+    }
+
+    private static void RegisterImageGeneration(IServiceCollection services, IConfiguration configuration)
+    {
+        var openAiConfig = configuration.GetSection("OpenAi").Get<OpenAiConfig>() ?? new OpenAiConfig();
+        var r2Config     = configuration.GetSection("R2").Get<R2Config>()         ?? new R2Config();
+
+        services.AddSingleton(openAiConfig);
+        services.AddSingleton(r2Config);
+
+        services.AddHttpClient<ImageGenerationService>(client =>
+        {
+            client.BaseAddress = new Uri("https://api.openai.com/");
+            client.Timeout     = TimeSpan.FromSeconds(120);
+        });
+
+        services.AddTransient<IImageGenerationService>(sp => sp.GetRequiredService<ImageGenerationService>());
     }
 
     private static void RegisterSchedulingJobs(IServiceCollection services, IConfiguration configuration)

@@ -7,6 +7,7 @@ type ArticleContent = {
     Body: string
     RunnableSnippet: string option
     ImagePrompt: string
+    CoverImageUrl: string option
     Foreshadow: string
     Tags: string list
 }

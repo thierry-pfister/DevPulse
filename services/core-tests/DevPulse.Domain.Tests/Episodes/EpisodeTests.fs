@@ -86,6 +86,7 @@ let private dummyContent : EpisodeOutput =
           Body            = "body"
           RunnableSnippet = None
           ImagePrompt     = "imagePrompt"
+          CoverImageUrl   = None
           Foreshadow      = "foreshadow"
           Tags            = [] }
       Reddit  = None

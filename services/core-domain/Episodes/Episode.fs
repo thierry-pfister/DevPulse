@@ -78,6 +78,13 @@ module Episode =
         | Draft -> Ok { episode with PublishAt = Some newPublishAt }
         | s     -> Error $"Cannot delay episode with status {s}"
 
+    let setCoverImage (url: string) (episode: Episode) : Episode =
+        match episode.Content with
+        | None -> episode
+        | Some output ->
+            let updatedArticle = { output.Article with CoverImageUrl = Some url }
+            { episode with Content = Some { output with Article = updatedArticle } }
+
     let recordPlatformId (platform: string) (platformId: string) (episode: Episode) : Episode =
         { episode with PlatformIds = Map.add platform platformId episode.PlatformIds }
 

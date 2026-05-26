@@ -113,6 +113,7 @@ public class EpisodesController(IEpisodeRepository repo) : ControllerBase
         Body:            a.Body,
         RunnableSnippet: a.RunnableSnippet?.Value,
         ImagePrompt:     a.ImagePrompt,
+        CoverImageUrl:   a.CoverImageUrl?.Value,
         Foreshadow:      a.Foreshadow,
         Tags:            a.Tags.ToList()
     );

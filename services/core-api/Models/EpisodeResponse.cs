@@ -7,6 +7,7 @@ public record ArticleContentResponse(
     string Body,
     string? RunnableSnippet,
     string ImagePrompt,
+    string? CoverImageUrl,
     string Foreshadow,
     List<string> Tags);
 

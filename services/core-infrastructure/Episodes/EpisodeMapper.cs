@@ -101,6 +101,7 @@ internal static class EpisodeMapper
             Body:            o.Article.Body,
             RunnableSnippet: o.Article.RunnableSnippet?.Value,
             ImagePrompt:     o.Article.ImagePrompt,
+            CoverImageUrl:   o.Article.CoverImageUrl?.Value,
             Foreshadow:      o.Article.Foreshadow,
             Tags:            o.Article.Tags.ToList()),
         Reddit:  o.Reddit  is null ? null : new RedditContentDto(o.Reddit.Value.Title, o.Reddit.Value.Body),
@@ -121,6 +122,9 @@ internal static class EpisodeMapper
                 ? FSharpOption<string>.None
                 : FSharpOption<string>.Some(dto.Article.RunnableSnippet),
             imagePrompt:     dto.Article.ImagePrompt,
+            coverImageUrl:   dto.Article.CoverImageUrl is null
+                ? FSharpOption<string>.None
+                : FSharpOption<string>.Some(dto.Article.CoverImageUrl),
             foreshadow:      dto.Article.Foreshadow,
             tags:            ListModule.OfSeq(dto.Article.Tags));
 
