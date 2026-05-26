@@ -1,8 +1,10 @@
 using DevPulse.Api.Models;
 using DevPulse.Application.Episodes;
+using DevPulse.Infrastructure.Scheduling;
 using static DevPulse.Application.Episodes.EpisodeCommands;
 using static DevPulse.Application.Episodes.EpisodeQueries;
 using DevPulse.Domain.Episodes;
+using Hangfire;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.FSharp.Core;
@@ -13,6 +15,31 @@ namespace DevPulse.Api.Controllers;
 [Route("api/[controller]")]
 public class EpisodesController(IEpisodeRepository repo) : ControllerBase
 {
+    [HttpPost]
+    [Authorize]
+    public async Task<ActionResult<EpisodeResponse>> Create([FromBody] CreateEpisodeRequest request)
+    {
+        var language  = request.Language is null
+            ? FSharpOption<string>.None
+            : FSharpOption<string>.Some(request.Language);
+        var publishAt = request.PublishAt ?? DateTimeOffset.UtcNow.AddMinutes(30);
+        var cmd       = new CreateEpisodeCommand(request.Concept, request.Tag, language, publishAt);
+        var result    = await createEpisode(repo, DateTimeOffset.UtcNow, cmd);
+        return result.IsOk
+            ? CreatedAtAction(nameof(Get), new { id = result.ResultValue.Id.Item }, ToResponse(result.ResultValue))
+            : MapError(result.ErrorValue);
+    }
+
+    [HttpPost("{id:guid}/generate")]
+    [Authorize]
+    public async Task<ActionResult> Generate(Guid id)
+    {
+        var ep = await repo.FindById(EpisodeId.NewEpisodeId(id));
+        if (ep is null) return NotFound();
+        BackgroundJob.Enqueue<GenerateEpisodeJob>(j => j.Execute(id));
+        return Accepted();
+    }
+
     [HttpGet]
     public async Task<ActionResult<IEnumerable<EpisodeResponse>>> List([FromQuery] string? status = null)
     {

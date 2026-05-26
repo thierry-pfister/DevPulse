@@ -26,3 +26,9 @@ public record EpisodeResponse(
     ArticleContentResponse? Content);
 
 public record DelayRequest(DateTimeOffset NewPublishAt);
+
+public record CreateEpisodeRequest(
+    string Concept,
+    string Tag,
+    string? Language,
+    DateTimeOffset? PublishAt);
