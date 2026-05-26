@@ -13,7 +13,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <RootNamespace>core_api</RootNamespace>
+    <RootNamespace>DevPulse.Api</RootNamespace>
   </PropertyGroup>
 
 </Project>
