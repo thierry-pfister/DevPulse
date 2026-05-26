@@ -1,0 +1,104 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+    container_name: devpulse-api
+    restart: unless-stopped
+    ports:
+      - "5013:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__Postgres=Host=postgres;Port=5432;Database=devpulse;Username=devpulse;Password=${POSTGRES_PASSWORD}
+      - ConnectionStrings__Redis=redis:6379
+      - Authentication__ApiKey=${API_KEY}
+      - Claude__ApiKey=${CLAUDE_API_KEY}
+      - Claude__Model=claude-sonnet-4-6
+      - Claude__MaxTokens=4096
+      - OpenAi__ApiKey=${OPENAI_API_KEY}
+      - OpenAi__Model=gpt-image-1
+      - OpenAi__ImageSize=1024x1024
+      - OpenAi__ImageQuality=medium
+      - R2__AccessKeyId=${R2_ACCESS_KEY_ID}
+      - R2__SecretAccessKey=${R2_SECRET_ACCESS_KEY}
+      - R2__BucketName=ai-blog
+      - R2__Endpoint=https://87d029062cae1f43987d18d8d204e26e.r2.cloudflarestorage.com
+      - R2__PublicUrl=https://pub-1ddcce9a77e8483993f72bbcd1723a00.r2.dev
+      - Publishers__PfstrCore__BaseUrl=${PFSTR_CORE_URL}
+      - Publishers__PfstrCore__ApiKey=${PFSTR_CORE_API_KEY}
+      - Resend__ApiKey=${RESEND_API_KEY}
+      - Resend__FromEmail=devpulse@thierrypfister.dev
+      - Resend__ToEmail=thierrypfister@protonmail.com
+      - Scheduling__DailyJobCron=0 6 * * *
+      - Scheduling__BacklogJobCron=0 3 * * 0
+      - Scheduling__InterventionWindowMinutes=30
+      - Scheduling__BacklogMinPerTag=5
+      - Scheduling__TagCadence__functional=3
+      - Scheduling__TagCadence__devops=3
+      - Scheduling__TagCadence__security=3
+      - Scheduling__TagCadence__architecture=4
+      - Scheduling__TagCadence__dotnet=3
+      - Scheduling__TagCadence__patterns=5
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - devpulse
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: docker/dashboard.Dockerfile
+    container_name: devpulse-dashboard
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://devpulse-api:8080
+      - API_KEY=${API_KEY}
+    depends_on:
+      - api
+    networks:
+      - devpulse
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: devpulse-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: devpulse
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: devpulse
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U devpulse -d devpulse"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - devpulse
+
+  redis:
+    image: redis:7-alpine
+    container_name: devpulse-redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - devpulse
+
+networks:
+  devpulse:
+
+volumes:
+  postgres_data:
+  redis_data:
