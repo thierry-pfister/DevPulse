@@ -65,9 +65,10 @@ public class EpisodesController(IEpisodeRepository repo) : ControllerBase
     [Authorize]
     public async Task<ActionResult> Approve(Guid id)
     {
-        var cmd = new ApproveEpisodeCommand(EpisodeId.NewEpisodeId(id), DateTimeOffset.UtcNow);
-        var result = await approveEpisode(repo, cmd);
-        return result.IsOk ? NoContent() : MapError(result.ErrorValue);
+        var ep = await repo.FindById(EpisodeId.NewEpisodeId(id));
+        if (ep is null) return NotFound();
+        BackgroundJob.Enqueue<PublishEpisodeJob>(j => j.Execute(id));
+        return Accepted();
     }
 
     [HttpPost("{id:guid}/skip")]
