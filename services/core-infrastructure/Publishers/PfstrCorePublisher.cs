@@ -31,10 +31,12 @@ public class PfstrCorePublisher(HttpClient http) : IPublisher
 
             var updateRes = await http.PutAsJsonAsync($"/api/posts/{created.Id}", new
             {
-                title   = article.Title,
-                summary = article.Subtitle,
-                content = article.Body,
-                tags    = article.Tags,
+                title        = article.Title,
+                summary      = article.Subtitle,
+                subtitle     = article.Subtitle,
+                content      = article.Body,
+                canonicalUrl = $"https://thierrypfister.dev/blog/{slug}",
+                tags         = article.Tags,
             });
 
             if (!updateRes.IsSuccessStatusCode)
