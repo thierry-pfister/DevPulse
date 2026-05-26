@@ -1,0 +1,17 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.nupkg
+*.snupkg
+
+# Node
+node_modules/
+.next/
+.env.local
+.env*.local
+
+# Misc
+.DS_Store

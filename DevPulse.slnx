@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/services/" />
+  <Folder Name="/services/core-domain/">
+    <Project Path="services/core-domain/DevPulse.Domain.fsproj" />
+  </Folder>
+</Solution>
