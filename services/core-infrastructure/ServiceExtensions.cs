@@ -49,10 +49,13 @@ public static class ServiceExtensions
             client.DefaultRequestHeaders.Add("X-Api-Key", pfstrConfig.ApiKey);
         });
 
+        services.Configure<DevToConfig>(configuration.GetSection("Publishers:DevTo"));
+
         services.AddHttpClient<DevToPublisher>(client =>
         {
             client.BaseAddress = new Uri("https://dev.to/");
-            client.DefaultRequestHeaders.Add("api-key", devToConfig.ApiKey);
+            if (!string.IsNullOrWhiteSpace(devToConfig.ApiKey))
+                client.DefaultRequestHeaders.Add("api-key", devToConfig.ApiKey);
         });
 
         services.AddTransient<IPublisher>(sp => sp.GetRequiredService<PfstrCorePublisher>());

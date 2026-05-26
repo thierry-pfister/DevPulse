@@ -1,15 +1,19 @@
 using System.Net.Http.Json;
 using DevPulse.Application.Publishing;
 using DevPulse.Domain.Episodes;
+using Microsoft.Extensions.Options;
 
 namespace DevPulse.Infrastructure.Publishers;
 
-public class DevToPublisher(HttpClient http) : IPublisher
+public class DevToPublisher(HttpClient http, IOptions<DevToConfig> config) : IPublisher
 {
     public string Name => "dev.to";
 
     public async Task<PublishResult> PublishAsync(EpisodeOutput episode)
     {
+        if (string.IsNullOrWhiteSpace(config.Value.ApiKey))
+            return PublishResult.NewSkipped("Dev.to API key not configured — skipping");
+
         try
         {
             var article   = episode.Article;
