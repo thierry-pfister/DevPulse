@@ -7,6 +7,9 @@
 
   <ItemGroup>
     <Compile Include="Publishing/IPublisher.fs" />
+    <Compile Include="Episodes/IEpisodeRepository.fs" />
+    <Compile Include="Episodes/EpisodeCommands.fs" />
+    <Compile Include="Episodes/EpisodeQueries.fs" />
   </ItemGroup>
 
   <ItemGroup>
