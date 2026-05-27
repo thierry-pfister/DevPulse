@@ -56,7 +56,7 @@ public class YouTubeUploadService(
         }
     }
 
-    private Task<UserCredential> BuildCredentialAsync()
+    private async Task<UserCredential> BuildCredentialAsync()
     {
         var flow = new GoogleAuthorizationCodeFlow(new GoogleAuthorizationCodeFlow.Initializer
         {
@@ -68,7 +68,9 @@ public class YouTubeUploadService(
             Scopes = [YouTubeService.Scope.YoutubeUpload],
         });
 
-        var token = new TokenResponse { RefreshToken = config.RefreshToken };
-        return Task.FromResult(new UserCredential(flow, "user", token));
+        var token      = new TokenResponse { RefreshToken = config.RefreshToken };
+        var credential = new UserCredential(flow, "user", token);
+        await credential.RefreshTokenAsync(CancellationToken.None);
+        return credential;
     }
 }
