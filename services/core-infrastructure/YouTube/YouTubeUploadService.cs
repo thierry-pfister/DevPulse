@@ -29,7 +29,7 @@ public class YouTubeUploadService(
                 Snippet = new VideoSnippet
                 {
                     Title       = title,
-                    Description = $"{description}\n\n#Shorts",
+                    Description = $"{description[..Math.Min(description.Length, 4500)]}\n\n#Shorts",
                     Tags        = tags.Concat(["Shorts"]).ToList(),
                 },
                 Status = new VideoStatus { PrivacyStatus = "public" },

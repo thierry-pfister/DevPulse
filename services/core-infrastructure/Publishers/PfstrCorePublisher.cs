@@ -22,14 +22,27 @@ public class PfstrCorePublisher(HttpClient http) : IPublisher
                 summary = article.Subtitle,
             });
 
-            if (!createRes.IsSuccessStatusCode)
+            Guid postId;
+            if (createRes.StatusCode == System.Net.HttpStatusCode.Conflict)
+            {
+                var existing = await http.GetFromJsonAsync<GetPostBySlugResponse>($"/api/posts/{slug}");
+                if (existing is null)
+                    return PublishResult.NewFailed("Post conflict but could not find existing post by slug");
+                postId = existing.Id;
+            }
+            else if (createRes.IsSuccessStatusCode)
+            {
+                var created = await createRes.Content.ReadFromJsonAsync<CreatePostResponse>();
+                if (created is null)
+                    return PublishResult.NewFailed("Empty create response from pfstr-core");
+                postId = created.Id;
+            }
+            else
+            {
                 return PublishResult.NewFailed($"Create failed: {createRes.StatusCode}");
+            }
 
-            var created = await createRes.Content.ReadFromJsonAsync<CreatePostResponse>();
-            if (created is null)
-                return PublishResult.NewFailed("Empty create response from pfstr-core");
-
-            var updateRes = await http.PutAsJsonAsync($"/api/posts/{created.Id}", new
+            var updateRes = await http.PutAsJsonAsync($"/api/posts/{postId}", new
             {
                 title        = article.Title,
                 summary      = article.Subtitle,
@@ -43,10 +56,10 @@ public class PfstrCorePublisher(HttpClient http) : IPublisher
             if (!updateRes.IsSuccessStatusCode)
                 return PublishResult.NewFailed($"Update failed: {updateRes.StatusCode}");
 
-            var publishRes = await http.PostAsync($"/api/posts/{created.Id}/publish", null);
+            var publishRes = await http.PostAsync($"/api/posts/{postId}/publish", null);
 
             return publishRes.IsSuccessStatusCode
-                ? PublishResult.NewPublished(created.Id.ToString())
+                ? PublishResult.NewPublished(postId.ToString())
                 : PublishResult.NewFailed($"Publish failed: {publishRes.StatusCode}");
         }
         catch (Exception ex)
@@ -57,3 +70,4 @@ public class PfstrCorePublisher(HttpClient http) : IPublisher
 }
 
 file record CreatePostResponse(Guid Id);
+file record GetPostBySlugResponse(Guid Id);
