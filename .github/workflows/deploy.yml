@@ -21,6 +21,10 @@ jobs:
           PFSTR_CORE_URL: ${{ secrets.PFSTR_CORE_URL }}
           PFSTR_CORE_API_KEY: ${{ secrets.PFSTR_CORE_API_KEY }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          DEVTO_API_KEY: ${{ secrets.DEVTO_API_KEY }}
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
         run: |
           docker compose -f docker-compose.prod.yml build
           docker compose -f docker-compose.prod.yml up -d
