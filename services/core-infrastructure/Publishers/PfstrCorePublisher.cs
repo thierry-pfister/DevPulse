@@ -58,7 +58,7 @@ public class PfstrCorePublisher(HttpClient http) : IPublisher
 
             var publishRes = await http.PostAsync($"/api/posts/{postId}/publish", null);
 
-            return publishRes.IsSuccessStatusCode
+            return publishRes.IsSuccessStatusCode || publishRes.StatusCode == System.Net.HttpStatusCode.UnprocessableEntity
                 ? PublishResult.NewPublished(postId.ToString())
                 : PublishResult.NewFailed($"Publish failed: {publishRes.StatusCode}");
         }

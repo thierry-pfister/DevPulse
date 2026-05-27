@@ -29,7 +29,7 @@ public class YouTubeUploadService(
                 Snippet = new VideoSnippet
                 {
                     Title       = title,
-                    Description = $"{description[..Math.Min(description.Length, 4500)]}\n\n#Shorts",
+                    Description = BuildDescription(description),
                     Tags        = tags.Concat(["Shorts"]).ToList(),
                 },
                 Status = new VideoStatus { PrivacyStatus = "public" },
@@ -54,6 +54,15 @@ public class YouTubeUploadService(
             logger.LogError(ex, "YouTube upload failed for '{Title}'", title);
             return null;
         }
+    }
+
+    private static string BuildDescription(string description)
+    {
+        // Strip control characters and URLs which YouTube rejects
+        var clean = System.Text.RegularExpressions.Regex.Replace(description, @"https?://\S+", "");
+        clean = System.Text.RegularExpressions.Regex.Replace(clean, @"[^ -~ -퟿豈-﷏ﷰ-￯\n]", "");
+        clean = clean.Trim()[..Math.Min(clean.Trim().Length, 4500)];
+        return $"{clean}\n\n#Shorts";
     }
 
     private async Task<UserCredential> BuildCredentialAsync()
