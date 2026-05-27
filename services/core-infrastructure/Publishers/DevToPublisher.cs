@@ -1,11 +1,12 @@
 using System.Net.Http.Json;
 using DevPulse.Application.Publishing;
 using DevPulse.Domain.Episodes;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace DevPulse.Infrastructure.Publishers;
 
-public class DevToPublisher(HttpClient http, IOptions<DevToConfig> config) : IPublisher
+public class DevToPublisher(HttpClient http, IOptions<DevToConfig> config, ILogger<DevToPublisher> logger) : IPublisher
 {
     public string Name => "dev.to";
 
@@ -35,6 +36,7 @@ public class DevToPublisher(HttpClient http, IOptions<DevToConfig> config) : IPu
             if (!response.IsSuccessStatusCode)
             {
                 var error = await response.Content.ReadAsStringAsync();
+                logger.LogWarning("Dev.to failed ({Status}): {Body}", response.StatusCode, error);
                 return PublishResult.NewFailed($"Dev.to failed ({response.StatusCode}): {error}");
             }
 
