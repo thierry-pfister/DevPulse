@@ -39,6 +39,7 @@ services:
       - Scheduling__TagCadence__architecture=4
       - Scheduling__TagCadence__dotnet=3
       - Scheduling__TagCadence__patterns=5
+      - Publishers__DevTo__ApiKey=${DEVTO_API_KEY}
     depends_on:
       postgres:
         condition: service_healthy
