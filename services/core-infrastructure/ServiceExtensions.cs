@@ -59,6 +59,7 @@ public static class ServiceExtensions
         services.AddTransient<ICodeScreenshotService, CodeScreenshotService>();
         services.AddTransient<IVideoAssemblyService, VideoAssemblyService>();
         services.AddScoped<YouTubeShortsJob>();
+        RegisterYouTube(services, configuration);
         RegisterPublishers(services, configuration);
         RegisterSchedulingJobs(services, configuration);
 
@@ -179,6 +180,13 @@ public static class ServiceExtensions
         });
 
         services.AddTransient<ITtsService>(sp => sp.GetRequiredService<TtsService>());
+    }
+
+    private static void RegisterYouTube(IServiceCollection services, IConfiguration configuration)
+    {
+        var youTubeConfig = configuration.GetSection("YouTube").Get<YouTubeConfig>() ?? new YouTubeConfig();
+        services.AddSingleton(youTubeConfig);
+        services.AddTransient<IYouTubeUploadService, YouTubeUploadService>();
     }
 
     private static void RegisterSchedulingJobs(IServiceCollection services, IConfiguration configuration)

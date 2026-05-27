@@ -9,6 +9,7 @@
     <PackageReference Include="FluentMigrator" Version="*" />
     <PackageReference Include="FluentMigrator.Runner" Version="*" />
     <PackageReference Include="FluentMigrator.Runner.Postgres" Version="*" />
+    <PackageReference Include="Google.Apis.YouTube.v3" Version="1.74.0.4137" />
     <PackageReference Include="Hangfire.AspNetCore" Version="1.8.23" />
     <PackageReference Include="Hangfire.Core" Version="*" />
     <PackageReference Include="Hangfire.PostgreSql" Version="*" />

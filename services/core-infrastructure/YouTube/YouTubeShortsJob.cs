@@ -13,6 +13,7 @@ public class YouTubeShortsJob(
     ITtsService             tts,
     ICodeScreenshotService  screenshot,
     IVideoAssemblyService   video,
+    IYouTubeUploadService   youTube,
     R2Config                r2Config,
     ILogger<YouTubeShortsJob> logger)
 {
@@ -34,12 +35,8 @@ public class YouTubeShortsJob(
             return;
         }
 
-        byte[]? imageBytes = null;
-        var snippet = article.RunnableSnippet != null
-            ? article.RunnableSnippet.Value
-            : string.Empty;
-
-        imageBytes = await screenshot.CaptureAsync(snippet, article.Title);
+        var snippet    = article.RunnableSnippet != null ? article.RunnableSnippet.Value : string.Empty;
+        var imageBytes = await screenshot.CaptureAsync(snippet, article.Title);
 
         var videoBytes = await video.AssembleAsync(imageBytes!, audioBytes);
         if (videoBytes is null)
@@ -48,13 +45,21 @@ public class YouTubeShortsJob(
             return;
         }
 
-        var url = await UploadToR2(videoBytes, episodeId);
-        if (url is null) return;
+        var r2Url   = await UploadToR2(videoBytes, episodeId);
+        var videoId = await youTube.UploadAsync(videoBytes, yt.Title, yt.Description, article.Tags);
 
-        var updated = EpisodeModule.setVideoUrl(url, episode);
+        var storeUrl = videoId is not null
+            ? $"https://youtube.com/shorts/{videoId}"
+            : r2Url;
+
+        if (storeUrl is null) return;
+
+        var updated = EpisodeModule.setVideoUrl(storeUrl, episode);
+        if (videoId is not null)
+            updated = EpisodeModule.recordPlatformId("youtube", videoId, updated);
+
         await repo.Save(updated);
-
-        logger.LogInformation("YouTube Short assembled for episode {Id}: {Url}", episodeId, url);
+        logger.LogInformation("YouTube Short published for episode {Id}: {Url}", episodeId, storeUrl);
     }
 
     private async Task<string?> UploadToR2(byte[] videoBytes, Guid episodeId)

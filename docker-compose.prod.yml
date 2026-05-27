@@ -40,6 +40,9 @@ services:
       - Scheduling__TagCadence__dotnet=3
       - Scheduling__TagCadence__patterns=5
       - Publishers__DevTo__ApiKey=${DEVTO_API_KEY}
+      - YouTube__ClientId=${YOUTUBE_CLIENT_ID}
+      - YouTube__ClientSecret=${YOUTUBE_CLIENT_SECRET}
+      - YouTube__RefreshToken=${YOUTUBE_REFRESH_TOKEN}
     depends_on:
       postgres:
         condition: service_healthy
