@@ -58,10 +58,11 @@ public class YouTubeUploadService(
 
     private static string BuildDescription(string description)
     {
-        // Strip control characters and URLs which YouTube rejects
         var clean = System.Text.RegularExpressions.Regex.Replace(description, @"https?://\S+", "");
-        clean = System.Text.RegularExpressions.Regex.Replace(clean, @"[^ -~ -퟿豈-﷏ﷰ-￯\n]", "");
-        clean = clean.Trim()[..Math.Min(clean.Trim().Length, 4500)];
+        clean = System.Text.RegularExpressions.Regex.Replace(clean, @"[<>]", "");
+        clean = System.Text.RegularExpressions.Regex.Replace(clean, @"[^ -~\n]", "");
+        clean = clean.Trim();
+        if (clean.Length > 4500) clean = clean[..4500];
         return $"{clean}\n\n#Shorts";
     }
 

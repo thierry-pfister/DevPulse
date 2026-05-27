@@ -29,7 +29,6 @@ public class DevToPublisher(HttpClient http, IOptions<DevToConfig> config, ILogg
                     body_markdown = article.Body,
                     published     = true,
                     tags          = article.Tags.Take(4).ToArray(),
-                    canonical_url = canonical,
                 }
             });
 
