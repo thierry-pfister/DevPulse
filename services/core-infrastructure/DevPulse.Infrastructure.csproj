@@ -16,6 +16,7 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="*" />
     <PackageReference Include="AWSSDK.S3" Version="*" />
     <PackageReference Include="YamlDotNet" Version="*" />
+    <PackageReference Include="Microsoft.Playwright" Version="*" />
   </ItemGroup>
 
   <PropertyGroup>

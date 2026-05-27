@@ -78,6 +78,16 @@ module Episode =
         | Draft -> Ok { episode with PublishAt = Some newPublishAt }
         | s     -> Error $"Cannot delay episode with status {s}"
 
+    let setVideoUrl (url: string) (episode: Episode) : Episode =
+        match episode.Content with
+        | None -> episode
+        | Some output ->
+            match output.YouTube with
+            | None -> episode
+            | Some yt ->
+                let updatedYt = { yt with VideoUrl = Some url }
+                { episode with Content = Some { output with YouTube = Some updatedYt } }
+
     let setCoverImage (url: string) (episode: Episode) : Episode =
         match episode.Content with
         | None -> episode

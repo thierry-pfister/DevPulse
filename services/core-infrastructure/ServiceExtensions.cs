@@ -6,6 +6,7 @@ using DevPulse.Infrastructure.Config;
 using DevPulse.Infrastructure.Data;
 using DevPulse.Infrastructure.Episodes;
 using DevPulse.Infrastructure.ImageGeneration;
+using DevPulse.Infrastructure.YouTube;
 using DevPulse.Infrastructure.Migrations;
 using DevPulse.Infrastructure.Notifications;
 using DevPulse.Infrastructure.Publishers;
@@ -54,6 +55,10 @@ public static class ServiceExtensions
         RegisterClaude(services, configuration);
         RegisterNotifier(services, configuration);
         RegisterImageGeneration(services, configuration);
+        RegisterTts(services, configuration);
+        services.AddTransient<ICodeScreenshotService, CodeScreenshotService>();
+        services.AddTransient<IVideoAssemblyService, VideoAssemblyService>();
+        services.AddScoped<YouTubeShortsJob>();
         RegisterPublishers(services, configuration);
         RegisterSchedulingJobs(services, configuration);
 
@@ -157,6 +162,23 @@ public static class ServiceExtensions
         });
 
         services.AddTransient<IImageGenerationService>(sp => sp.GetRequiredService<ImageGenerationService>());
+    }
+
+    private static void RegisterTts(IServiceCollection services, IConfiguration configuration)
+    {
+        var openAiConfig = configuration.GetSection("OpenAi").Get<OpenAiConfig>() ?? new OpenAiConfig();
+        var ttsConfig    = configuration.GetSection("Tts").Get<TtsConfig>()       ?? new TtsConfig();
+
+        services.AddSingleton(ttsConfig);
+
+        services.AddHttpClient<TtsService>(client =>
+        {
+            client.BaseAddress                         = new Uri("https://api.openai.com/");
+            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", openAiConfig.ApiKey);
+            client.Timeout                             = TimeSpan.FromSeconds(120);
+        });
+
+        services.AddTransient<ITtsService>(sp => sp.GetRequiredService<TtsService>());
     }
 
     private static void RegisterSchedulingJobs(IServiceCollection services, IConfiguration configuration)

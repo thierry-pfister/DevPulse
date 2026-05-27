@@ -13,7 +13,7 @@ record ArticleContentDto(
 
 record RedditContentDto(string Title, string Body);
 
-record YouTubeContentDto(string Title, string Description, string Script);
+record YouTubeContentDto(string Title, string Description, string Script, string? VideoUrl);
 
 record EpisodeContentDto(
     ArticleContentDto Article,

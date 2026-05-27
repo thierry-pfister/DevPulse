@@ -21,6 +21,7 @@ type YouTubeContent = {
     Title: string
     Description: string
     Script: string
+    VideoUrl: string option
 }
 
 type EpisodeOutput = {

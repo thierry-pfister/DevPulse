@@ -105,7 +105,7 @@ internal static class EpisodeMapper
             Foreshadow:      o.Article.Foreshadow,
             Tags:            o.Article.Tags.ToList()),
         Reddit:  o.Reddit  is null ? null : new RedditContentDto(o.Reddit.Value.Title, o.Reddit.Value.Body),
-        YouTube: o.YouTube is null ? null : new YouTubeContentDto(o.YouTube.Value.Title, o.YouTube.Value.Description, o.YouTube.Value.Script)
+        YouTube: o.YouTube is null ? null : new YouTubeContentDto(o.YouTube.Value.Title, o.YouTube.Value.Description, o.YouTube.Value.Script, o.YouTube.Value.VideoUrl == null ? null : o.YouTube.Value.VideoUrl.Value)
     );
 
     internal static EpisodeOutput DeserializeContent(string json)
@@ -133,7 +133,11 @@ internal static class EpisodeMapper
             reddit:  dto.Reddit is null ? FSharpOption<RedditContent>.None
                 : FSharpOption<RedditContent>.Some(new RedditContent(dto.Reddit.Title, dto.Reddit.Body)),
             youTube: dto.YouTube is null ? FSharpOption<YouTubeContent>.None
-                : FSharpOption<YouTubeContent>.Some(new YouTubeContent(dto.YouTube.Title, dto.YouTube.Description, dto.YouTube.Script)));
+                : FSharpOption<YouTubeContent>.Some(new YouTubeContent(
+                    dto.YouTube.Title,
+                    dto.YouTube.Description,
+                    dto.YouTube.Script,
+                    dto.YouTube.VideoUrl is null ? FSharpOption<string>.None : FSharpOption<string>.Some(dto.YouTube.VideoUrl))));
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
