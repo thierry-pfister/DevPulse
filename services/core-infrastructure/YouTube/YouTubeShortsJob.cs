@@ -31,7 +31,7 @@ public class YouTubeShortsJob(
             return;
         }
 
-        var slides        = BuildSlides(article, yt);
+        var slides        = BuildSlides(article, yt, episode.Language?.Value);
         var images        = await screenshot.CaptureMultipleAsync(slides);
         var slidesWithDur = PairWithDurations(images, slides);
 
@@ -62,7 +62,7 @@ public class YouTubeShortsJob(
         logger.LogInformation("YouTube Short published for episode {Id}: {Url}", episodeId, storeUrl);
     }
 
-    private static IReadOnlyList<SlideContent> BuildSlides(ArticleContent article, YouTubeContent yt)
+    private static IReadOnlyList<SlideContent> BuildSlides(ArticleContent article, YouTubeContent yt, string? language)
     {
         var slides = new List<SlideContent>
         {
@@ -76,7 +76,7 @@ public class YouTubeShortsJob(
         if (!string.IsNullOrWhiteSpace(code))
         {
             foreach (var chunk in SplitCode(code, linesPerChunk: 8))
-                slides.Add(new SlideContent(SlideKind.Code, article.Title, Code: chunk));
+                slides.Add(new SlideContent(SlideKind.Code, article.Title, Code: chunk, Language: language));
         }
 
         slides.Add(new SlideContent(SlideKind.Takeaway, "Tomorrow", article.Foreshadow));

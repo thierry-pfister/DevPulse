@@ -6,7 +6,7 @@ internal static class SlideRenderer
     {
         SlideKind.Title    => TitleHtml(slide.Title, slide.Subtitle),
         SlideKind.Hook     => HookHtml(slide.Subtitle),
-        SlideKind.Code     => CodeHtml(slide.Title, slide.Code, slide.SlideIndex, slide.TotalSlides),
+        SlideKind.Code     => CodeHtml(slide.Title, slide.Code, slide.SlideIndex, slide.TotalSlides, slide.Language),
         SlideKind.Takeaway => TakeawayHtml(slide.Subtitle),
         _                  => TitleHtml(slide.Title, slide.Subtitle),
     };
@@ -45,23 +45,28 @@ internal static class SlideRenderer
             </div>
             """);
 
-    private static string CodeHtml(string title, string? code, int idx, int total) =>
+    private static string CodeHtml(string title, string? code, int idx, int total, string? language) =>
         Page("""
             .box{display:flex;flex-direction:column;height:100%;padding:56px 48px;gap:28px;}
             .brand{color:#7c6af7;font-size:22px;font-weight:700;letter-spacing:6px;text-transform:uppercase;}
+            .code-header{display:flex;justify-content:space-between;align-items:center;}
             .concept{color:#8b949e;font-size:28px;font-weight:600;}
-            .code-block{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:40px;flex:1;overflow:hidden;display:flex;}
+            .lang-badge{background:#161b22;color:#7c6af7;border:1px solid #7c6af7;border-radius:8px;padding:6px 18px;font-family:'Cascadia Code','Fira Code',Consolas,monospace;font-size:22px;font-weight:700;}
+            .code-block{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:40px;flex:1;overflow:hidden;display:flex;box-shadow:0 0 48px rgba(124,106,247,0.18);}
             .nums{color:#484f58;font-family:'Cascadia Code','Fira Code',Consolas,monospace;font-size:26px;line-height:1.7;padding-right:24px;border-right:1px solid #30363d;margin-right:24px;text-align:right;white-space:pre;}
-            pre{color:#e6edf3;font-family:'Cascadia Code','Fira Code',Consolas,monospace;font-size:26px;line-height:1.7;white-space:pre-wrap;word-break:break-word;margin:0;flex:1;}
+            pre{font-family:'Cascadia Code','Fira Code',Consolas,monospace;font-size:26px;line-height:1.7;white-space:pre-wrap;word-break:break-word;margin:0;flex:1;}
             .dots{color:#484f58;font-size:36px;align-self:center;letter-spacing:8px;}
             """,
             $$"""
             <div class="box">
               <div class="brand">DevPulse</div>
-              <div class="concept">{{E(title)}}</div>
+              <div class="code-header">
+                <div class="concept">{{E(title)}}</div>
+                {{Wrap("lang-badge", FormatLanguage(language))}}
+              </div>
               <div class="code-block">
                 <div class="nums">{{LineNums(code)}}</div>
-                <pre>{{E(code ?? "")}}</pre>
+                <pre>{{SyntaxHighlighter.Highlight(code ?? "")}}</pre>
               </div>
               <div class="dots">{{Dots(idx, total)}}</div>
             </div>
@@ -114,4 +119,17 @@ internal static class SlideRenderer
 
     private static string Dots(int current, int total) =>
         string.Concat(Enumerable.Range(0, total).Select(i => i == current ? "●" : "○"));
+
+    private static string FormatLanguage(string? lang) => lang?.ToLowerInvariant() switch
+    {
+        "fsharp"     => "F#",
+        "csharp"     => "C#",
+        "bash"       => "bash",
+        "yaml"       => "YAML",
+        "sql"        => "SQL",
+        "typescript" => "TS",
+        "javascript" => "JS",
+        { } other    => other,
+        null         => "code",
+    };
 }

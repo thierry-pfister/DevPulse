@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text;
 using Microsoft.Extensions.Logging;
 
 namespace DevPulse.Infrastructure.YouTube;
@@ -9,20 +10,20 @@ public class VideoAssemblyService(ILogger<VideoAssemblyService> logger) : IVideo
         IReadOnlyList<(byte[] Image, double DurationSeconds)> slides,
         byte[] audioBytes)
     {
+        if (slides.Count == 0) return null;
+
         var tmpDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
         Directory.CreateDirectory(tmpDir);
         try
         {
             var audioPath  = Path.Combine(tmpDir, "audio.mp3");
-            var concatPath = Path.Combine(tmpDir, "slides.txt");
             var outputPath = Path.Combine(tmpDir, "short.mp4");
 
             await File.WriteAllBytesAsync(audioPath, audioBytes);
-            await WriteConcatFile(concatPath, tmpDir, slides);
+            for (var i = 0; i < slides.Count; i++)
+                await File.WriteAllBytesAsync(Path.Combine(tmpDir, $"slide{i}.png"), slides[i].Image);
 
-            var args = $"-y -f concat -safe 0 -i \"{concatPath}\" -i \"{audioPath}\" " +
-                       $"-c:v libx264 -pix_fmt yuv420p -c:a aac -b:a 192k -shortest \"{outputPath}\"";
-
+            var args = BuildArgs(slides, tmpDir, audioPath, outputPath);
             return await RunFfmpegAsync(args)
                 ? await File.ReadAllBytesAsync(outputPath)
                 : null;
@@ -38,23 +39,46 @@ public class VideoAssemblyService(ILogger<VideoAssemblyService> logger) : IVideo
         }
     }
 
-    private static async Task WriteConcatFile(
-        string concatPath,
-        string tmpDir,
-        IReadOnlyList<(byte[] Image, double DurationSeconds)> slides)
+    private static string BuildArgs(
+        IReadOnlyList<(byte[] Image, double DurationSeconds)> slides,
+        string tmpDir, string audioPath, string outputPath)
     {
-        var lines = new List<string> { "ffconcat version 1.0" };
+        var inputs = new StringBuilder("-y ");
         for (var i = 0; i < slides.Count; i++)
+            inputs.Append($"-loop 1 -t {slides[i].DurationSeconds:F1} -i \"{Path.Combine(tmpDir, $"slide{i}.png")}\" ");
+        inputs.Append($"-i \"{audioPath}\"");
+
+        var filter    = BuildFilterComplex(slides);
+        var audioIdx  = slides.Count;
+
+        return $"{inputs} -filter_complex \"{filter}\" " +
+               $"-map \"[vout]\" -map {audioIdx}:a " +
+               $"-c:v libx264 -pix_fmt yuv420p -c:a aac -b:a 192k -shortest \"{outputPath}\"";
+    }
+
+    internal static string BuildFilterComplex(IReadOnlyList<(byte[] Image, double DurationSeconds)> slides)
+    {
+        const double Td = 0.3;
+        var n  = slides.Count;
+        var sb = new StringBuilder();
+
+        if (n == 1)
+            return "[0:v]fps=30,scale=1080:1920[vout]";
+
+        for (var i = 0; i < n; i++)
+            sb.Append($"[{i}:v]fps=30,scale=1080:1920[v{i}];");
+
+        double cumulative = 0;
+        for (var i = 0; i < n - 1; i++)
         {
-            var imgPath = Path.Combine(tmpDir, $"slide{i}.png");
-            await File.WriteAllBytesAsync(imgPath, slides[i].Image);
-            lines.Add($"file '{imgPath}'");
-            lines.Add($"duration {slides[i].DurationSeconds:F1}");
+            cumulative += slides[i].DurationSeconds;
+            var offset = cumulative - (i + 1) * Td;
+            var inA    = i == 0 ? "[v0]" : $"[x{i}]";
+            var outV   = i == n - 2 ? "[vout]" : $"[x{i + 1}]";
+            sb.Append($"{inA}[v{i + 1}]xfade=transition=fade:duration={Td:F2}:offset={offset:F2}{outV};");
         }
-        // ffconcat requires repeating the last file without a duration
-        var last = Path.Combine(tmpDir, $"slide{slides.Count - 1}.png");
-        lines.Add($"file '{last}'");
-        await File.WriteAllTextAsync(concatPath, string.Join('\n', lines));
+
+        return sb.ToString().TrimEnd(';');
     }
 
     private async Task<bool> RunFfmpegAsync(string args)

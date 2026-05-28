@@ -7,5 +7,6 @@ public record SlideContent(
     string    Title,
     string?   Subtitle    = null,
     string?   Code        = null,
+    string?   Language    = null,
     int       SlideIndex  = 0,
     int       TotalSlides = 0);
