@@ -63,7 +63,7 @@ public class PfstrCorePublisherTests
     }
 
     [Fact]
-    public async Task PublishAsync_returns_failed_when_publish_endpoint_returns_error()
+    public async Task PublishAsync_treats_422_as_published_already_published()
     {
         var mock = new MockHttpMessageHandler();
         mock.When(HttpMethod.Post, "*/api/posts")
@@ -72,6 +72,22 @@ public class PfstrCorePublisherTests
             .Respond(HttpStatusCode.NoContent);
         mock.When(HttpMethod.Post, $"*/api/posts/{PostId}/publish")
             .Respond(HttpStatusCode.UnprocessableEntity);
+
+        var result = await BuildPublisher(mock).PublishAsync(EpisodeFixtures.Simple());
+
+        result.Should().BeOfType<PublishResult.Published>();
+    }
+
+    [Fact]
+    public async Task PublishAsync_returns_failed_when_publish_endpoint_returns_server_error()
+    {
+        var mock = new MockHttpMessageHandler();
+        mock.When(HttpMethod.Post, "*/api/posts")
+            .Respond("application/json", $$$"""{"id":"{{{PostId}}}"}""");
+        mock.When(HttpMethod.Put, $"*/api/posts/{PostId}")
+            .Respond(HttpStatusCode.NoContent);
+        mock.When(HttpMethod.Post, $"*/api/posts/{PostId}/publish")
+            .Respond(HttpStatusCode.InternalServerError);
 
         var result = await BuildPublisher(mock).PublishAsync(EpisodeFixtures.Simple());
 

@@ -2,5 +2,5 @@ namespace DevPulse.Infrastructure.YouTube;
 
 public interface ICodeScreenshotService
 {
-    Task<byte[]?> CaptureAsync(string code, string title);
+    Task<byte[]?[]> CaptureMultipleAsync(IReadOnlyList<SlideContent> slides);
 }

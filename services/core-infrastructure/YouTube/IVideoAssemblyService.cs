@@ -2,5 +2,7 @@ namespace DevPulse.Infrastructure.YouTube;
 
 public interface IVideoAssemblyService
 {
-    Task<byte[]?> AssembleAsync(byte[] imageBytes, byte[] audioBytes);
+    Task<byte[]?> AssembleFromSlidesAsync(
+        IReadOnlyList<(byte[] Image, double DurationSeconds)> slides,
+        byte[] audioBytes);
 }

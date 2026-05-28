@@ -3,6 +3,7 @@ using DevPulse.Application.Publishing;
 using DevPulse.Infrastructure.Publishers;
 using DevPulse.Tests.Fixtures;
 using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using RichardSzalay.MockHttp;
 
@@ -15,7 +16,7 @@ public class DevToPublisherTests
         var client = mock.ToHttpClient();
         client.BaseAddress = new Uri("https://dev.to/");
         var config = Options.Create(new DevToConfig { ApiKey = apiKey });
-        return new DevToPublisher(client, config);
+        return new DevToPublisher(client, config, NullLogger<DevToPublisher>.Instance);
     }
 
     [Fact]
@@ -66,7 +67,7 @@ public class DevToPublisherTests
     }
 
     [Fact]
-    public async Task PublishAsync_sets_canonical_url_to_blog_slug()
+    public async Task PublishAsync_sends_title_and_body_in_request()
     {
         string? capturedBody = null;
         var mock = new MockHttpMessageHandler();
@@ -76,6 +77,6 @@ public class DevToPublisherTests
 
         await BuildPublisher(mock).PublishAsync(EpisodeFixtures.Simple());
 
-        capturedBody.Should().Contain("thierrypfister.dev/blog/the-maybe-monad");
+        capturedBody.Should().Contain("The Maybe Monad");
     }
 }

@@ -5,28 +5,27 @@ namespace DevPulse.Infrastructure.YouTube;
 
 public class VideoAssemblyService(ILogger<VideoAssemblyService> logger) : IVideoAssemblyService
 {
-    public async Task<byte[]?> AssembleAsync(byte[] imageBytes, byte[] audioBytes)
+    public async Task<byte[]?> AssembleFromSlidesAsync(
+        IReadOnlyList<(byte[] Image, double DurationSeconds)> slides,
+        byte[] audioBytes)
     {
-        var tmpDir  = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+        var tmpDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
         Directory.CreateDirectory(tmpDir);
-
-        var imagePath  = Path.Combine(tmpDir, "frame.png");
-        var audioPath  = Path.Combine(tmpDir, "audio.mp3");
-        var outputPath = Path.Combine(tmpDir, "short.mp4");
-
         try
         {
-            await File.WriteAllBytesAsync(imagePath, imageBytes);
+            var audioPath  = Path.Combine(tmpDir, "audio.mp3");
+            var concatPath = Path.Combine(tmpDir, "slides.txt");
+            var outputPath = Path.Combine(tmpDir, "short.mp4");
+
             await File.WriteAllBytesAsync(audioPath, audioBytes);
+            await WriteConcatFile(concatPath, tmpDir, slides);
 
-            var args = $"-y -loop 1 -i \"{imagePath}\" -i \"{audioPath}\" " +
-                       "-c:v libx264 -tune stillimage -c:a aac -b:a 192k " +
-                       "-pix_fmt yuv420p -shortest \"{outputPath}\"";
+            var args = $"-y -f concat -safe 0 -i \"{concatPath}\" -i \"{audioPath}\" " +
+                       $"-c:v libx264 -pix_fmt yuv420p -c:a aac -b:a 192k -shortest \"{outputPath}\"";
 
-            var result = await RunFfmpegAsync(args.Replace("\"{outputPath}\"", $"\"{outputPath}\""));
-            if (!result) return null;
-
-            return await File.ReadAllBytesAsync(outputPath);
+            return await RunFfmpegAsync(args)
+                ? await File.ReadAllBytesAsync(outputPath)
+                : null;
         }
         catch (Exception ex)
         {
@@ -39,18 +38,36 @@ public class VideoAssemblyService(ILogger<VideoAssemblyService> logger) : IVideo
         }
     }
 
+    private static async Task WriteConcatFile(
+        string concatPath,
+        string tmpDir,
+        IReadOnlyList<(byte[] Image, double DurationSeconds)> slides)
+    {
+        var lines = new List<string> { "ffconcat version 1.0" };
+        for (var i = 0; i < slides.Count; i++)
+        {
+            var imgPath = Path.Combine(tmpDir, $"slide{i}.png");
+            await File.WriteAllBytesAsync(imgPath, slides[i].Image);
+            lines.Add($"file '{imgPath}'");
+            lines.Add($"duration {slides[i].DurationSeconds:F1}");
+        }
+        // ffconcat requires repeating the last file without a duration
+        var last = Path.Combine(tmpDir, $"slide{slides.Count - 1}.png");
+        lines.Add($"file '{last}'");
+        await File.WriteAllTextAsync(concatPath, string.Join('\n', lines));
+    }
+
     private async Task<bool> RunFfmpegAsync(string args)
     {
         using var process = new Process
         {
             StartInfo = new ProcessStartInfo
             {
-                FileName               = "ffmpeg",
-                Arguments              = args,
-                RedirectStandardError  = true,
-                RedirectStandardOutput = true,
-                UseShellExecute        = false,
-                CreateNoWindow         = true,
+                FileName              = "ffmpeg",
+                Arguments             = args,
+                RedirectStandardError = true,
+                UseShellExecute       = false,
+                CreateNoWindow        = true,
             }
         };
 
@@ -59,7 +76,7 @@ public class VideoAssemblyService(ILogger<VideoAssemblyService> logger) : IVideo
         await process.WaitForExitAsync();
 
         if (process.ExitCode != 0)
-            logger.LogWarning("FFmpeg exited with code {Code}: {Stderr}", process.ExitCode, stderr);
+            logger.LogWarning("FFmpeg exited {Code}: {Stderr}", process.ExitCode, stderr);
 
         return process.ExitCode == 0;
     }

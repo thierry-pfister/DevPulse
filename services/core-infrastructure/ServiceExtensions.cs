@@ -187,6 +187,7 @@ public static class ServiceExtensions
         var youTubeConfig = configuration.GetSection("YouTube").Get<YouTubeConfig>() ?? new YouTubeConfig();
         services.AddSingleton(youTubeConfig);
         services.AddTransient<IYouTubeUploadService, YouTubeUploadService>();
+        services.AddTransient<IR2VideoStorage, R2VideoStorage>();
     }
 
     private static void RegisterSchedulingJobs(IServiceCollection services, IConfiguration configuration)
